@@ -175,6 +175,40 @@ def upgrade(args):
         sys.exit(1)
 
 
+@command('assess', help='Generates preupgrade report')
+@command_opt('--until_phase', metavar='UntilPhase', help='Modify default phase when stop')
+def assess(args):
+    if os.getuid():
+        raise CommandError('This command has to be run under the root user.')
+
+    context = str(uuid.uuid4())
+    configuration = {
+        'debug': os.getenv('LEAPP_DEBUG', '0'),
+        'verbose': os.getenv('LEAPP_VERBOSE', '0'),
+    }
+    e = Execution(context=context, kind='assess_preupgrade', configuration=configuration)
+    e.store()
+    archive_logfiles()
+    logger = configure_logger('leapp-assess.log')
+    os.environ['LEAPP_EXECUTION_ID'] = context
+
+    try:
+        repositories = load_repositories()
+    except LeappError as exc:
+        sys.stderr.write(exc.message)
+        sys.stderr.write('\n')
+        raise CommandError(exc.message)
+    workflow = repositories.lookup_workflow('IPUWorkflow')()
+    with beautify_actor_exception():
+        until_phase = args.until_phase or 'ReportsPhase'
+        workflow.run(context=context, until_phase=until_phase)
+
+    report_errors(workflow.errors)
+
+    if workflow.errors:
+        sys.exit(1)
+
+
 @command('list-runs', help='List previous Leapp upgrade executions')
 def list_runs(args):
     contexts = fetch_all_upgrade_contexts()
