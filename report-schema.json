@@ -66,6 +66,12 @@
                                 "type": "hint",
                                 "context": "Please update your scripts to be compatible with the changes."
                             }
+                        ],
+                        "external": [
+                            {
+                                "url": "https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/package_manifest/codereadylinuxbuilder-repository.",
+                                "title": "CodeReady Linux Builder repository"
+                            }
                         ]
                     },
                     "actor": "checkgrep",
@@ -85,7 +91,7 @@
             "$id": "#/properties/leapp_run_id",
             "type": "string",
             "title": "The leapp_run_id schema",
-            "description": "An explanation about the purpose of this instance.",
+            "description": "Unique id of a leapp execution.",
             "default": "",
             "examples": [
                 "a91dccab-84e8-4a28-b28e-102b073200a9"
@@ -146,7 +152,7 @@
                         "$id": "#/properties/entries/items/anyOf/0",
                         "type": "object",
                         "title": "The first anyOf schema",
-                        "description": "An explanation about the purpose of this instance.",
+                        "description": "A report entry.",
                         "default": {},
                         "examples": [
                             {
@@ -192,7 +198,7 @@
                                 "$id": "#/properties/entries/items/anyOf/0/properties/hostname",
                                 "type": "string",
                                 "title": "The hostname schema",
-                                "description": "An explanation about the purpose of this instance.",
+                                "description": "A hostname specified in a report entry.",
                                 "default": "",
                                 "examples": [
                                     "vagrant-leapp-20210113121507"
@@ -202,8 +208,9 @@
                                 "$id": "#/properties/entries/items/anyOf/0/properties/severity",
                                 "type": "string",
                                 "title": "The severity schema",
-                                "description": "An explanation about the purpose of this instance.",
-                                "default": "",
+                                "description": "Report severity.",
+                                "default": "info",
+                                "enum": ["info", "low", "medium", "high"],
                                 "examples": [
                                     "info"
                                 ]
@@ -212,7 +219,7 @@
                                 "$id": "#/properties/entries/items/anyOf/0/properties/tags",
                                 "type": "array",
                                 "title": "The tags schema",
-                                "description": "An explanation about the purpose of this instance.",
+                                "description": "Tags used for the report. May be merged with flags in the next version.",
                                 "default": [],
                                 "examples": [
                                     [
@@ -227,7 +234,7 @@
                                             "$id": "#/properties/entries/items/anyOf/0/properties/tags/items/anyOf/0",
                                             "type": "string",
                                             "title": "The first anyOf schema",
-                                            "description": "An explanation about the purpose of this instance.",
+                                            "description": "A report tag.",
                                             "default": "",
                                             "examples": [
                                                 "repository"
@@ -240,7 +247,7 @@
                                 "$id": "#/properties/entries/items/anyOf/0/properties/timeStamp",
                                 "type": "string",
                                 "title": "The timeStamp schema",
-                                "description": "An explanation about the purpose of this instance.",
+                                "description": "Report entry timestamp.",
                                 "default": "",
                                 "examples": [
                                     "2021-01-13T13:04:06.895402Z"
@@ -250,7 +257,7 @@
                                 "$id": "#/properties/entries/items/anyOf/0/properties/title",
                                 "type": "string",
                                 "title": "The title schema",
-                                "description": "An explanation about the purpose of this instance.",
+                                "description": "Report title.",
                                 "default": "",
                                 "examples": [
                                     "Excluded RHEL 8 repositories"
@@ -260,7 +267,7 @@
                                 "$id": "#/properties/entries/items/anyOf/0/properties/detail",
                                 "type": "object",
                                 "title": "The detail schema",
-                                "description": "An explanation about the purpose of this instance.",
+                                "description": "Additional information connected to the report (remediations, external links, related resources).",
                                 "default": {},
                                 "examples": [
                                     {
@@ -272,15 +279,17 @@
                                         ]
                                     }
                                 ],
-                                "required": [
-                                    "external"
+                                "anyOf": [
+			            { "required": [ "external" ] },
+				    { "required": [ "remediations" ] },
+				    { "required": [ "related_resources" ] }
                                 ],
                                 "properties": {
                                     "external": {
                                         "$id": "#/properties/entries/items/anyOf/0/properties/detail/properties/external",
                                         "type": "array",
-                                        "title": "The external schema",
-                                        "description": "An explanation about the purpose of this instance.",
+                                        "title": "The external links schema",
+                                        "description": "List of external links mentioned in the report entry.",
                                         "default": [],
                                         "examples": [
                                             [
@@ -297,8 +306,8 @@
                                                 {
                                                     "$id": "#/properties/entries/items/anyOf/0/properties/detail/properties/external/items/anyOf/0",
                                                     "type": "object",
-                                                    "title": "The first anyOf schema",
-                                                    "description": "An explanation about the purpose of this instance.",
+                                                    "title": "The first external link",
+                                                    "description": "An external link.",
                                                     "default": {},
                                                     "examples": [
                                                         {
@@ -315,7 +324,7 @@
                                                             "$id": "#/properties/entries/items/anyOf/0/properties/detail/properties/external/items/anyOf/0/properties/url",
                                                             "type": "string",
                                                             "title": "The url schema",
-                                                            "description": "An explanation about the purpose of this instance.",
+                                                            "description": "An external link url.",
                                                             "default": "",
                                                             "examples": [
                                                                 "https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/package_manifest/codereadylinuxbuilder-repository."
@@ -325,7 +334,7 @@
                                                             "$id": "#/properties/entries/items/anyOf/0/properties/detail/properties/external/items/anyOf/0/properties/title",
                                                             "type": "string",
                                                             "title": "The title schema",
-                                                            "description": "An explanation about the purpose of this instance.",
+                                                            "description": "An external link title.",
                                                             "default": "",
                                                             "examples": [
                                                                 "CodeReady Linux Builder repository"
@@ -336,14 +345,182 @@
                                                 }
                                             ]
                                         }
+                                    },
+                                    "related_resources": {
+                                        "$id": "#/properties/detail/properties/related_resources",
+                                        "type": "array",
+                                        "title": "The related_resources schema",
+                                        "description": "A list of related resources.",
+                                        "default": [],
+                                        "examples": [
+                                            [
+                                                {
+                                                    "scheme": "package",
+                                                    "title": "grep"
+                                                }
+                                            ]
+                                        ],
+                                        "additionalItems": true,
+                                        "items": {
+                                            "$id": "#/properties/detail/properties/related_resources/items",
+                                            "anyOf": [
+                                                {
+                                                    "$id": "#/properties/detail/properties/related_resources/items/anyOf/0",
+                                                    "type": "object",
+                                                    "title": "The first related resource",
+                                                    "description": "A resource related to the report entry.",
+                                                    "default": {},
+                                                    "examples": [
+                                                        {
+                                                            "scheme": "package",
+                                                            "title": "grep"
+                                                        }
+                                                    ],
+                                                    "required": [
+                                                        "scheme",
+                                                        "title"
+                                                    ],
+                                                   "properties": {
+                                                       "scheme": {
+                                                           "$id": "#/properties/detail/properties/related_resources/items/anyOf/0/properties/scheme",
+                                                           "type": "string",
+                                                           "title": "The scheme schema",
+                                                           "description": "A scheme (type) of the related resource.",
+                                                           "default": "",
+                                                           "examples": [
+                                                               "package"
+                                                           ]
+                                                       },
+                                                   "title": {
+                                                       "$id": "#/properties/detail/properties/related_resources/items/anyOf/0/properties/title",
+                                                       "type": "string",
+                                                       "title": "The title schema",
+                                                       "description": "Title of the related resource.",
+                                                       "default": "",
+                                                       "examples": [
+                                                           "grep"
+                                                       ]
+                                                   }
+                                               },
+                                               "additionalProperties": true
+                                               }
+                                           ]
+                                       }
+                                   },
+                                   "remediations": {
+                                       "$id": "#/properties/detail/properties/remediations",
+                                       "type": "array",
+                                       "title": "The remediations schema",
+                                       "description": "A list of remediations, describes what needs to be done to fix the problem.",
+                                       "default": [],
+                                       "examples": [
+                                           [
+                                               {
+                                                   "type": "hint",
+                                                   "context": "Please update your scripts to be compatible with the changes."
+                                               }
+                                           ]
+                                       ],
+                                       "additionalItems": true,
+                                       "items": {
+                                           "$id": "#/properties/detail/properties/remediations/items",
+                                           "anyOf": [
+                                               {
+                                                   "$id": "#/properties/detail/properties/remediations/items/anyOf/0",
+                                                   "type": "object",
+                                                   "title": "The first remediation",
+                                                   "description": "",
+                                                   "default": {},
+                                                   "examples": [
+                                                       {
+                                                           "type": "hint",
+                                                           "context": "Please update your scripts to be compatible with the changes."
+                                                       }
+                                                   ],
+                                                   "required": [
+                                                       "type",
+                                                       "context"
+                                                   ],
+                                                   "properties": {
+						       "anyOf": [
+						           {
+                                                               "type": {
+                                                                   "$id": "#/properties/detail/properties/remediations/items/anyOf/0/properties/type",
+                                                                   "type": "string",
+                                                                   "title": "The type schema",
+                                                                   "description": "Type of remediation.",
+                                                                   "default": "",
+							           "enum": ["hint", "playbook"],
+                                                                   "examples": [
+                                                                       "hint"
+                                                                   ]
+                                                               },
+                                                               "context": {
+                                                                   "$id": "#/properties/detail/properties/remediations/items/anyOf/0/properties/context",
+                                                                   "type": "string",
+                                                                   "title": "The context schema",
+                                                                   "description": "The remediation itself.",
+                                                                   "default": "",
+                                                                   "examples": [
+                                                                       "Please update your scripts to be compatible with the changes."
+                                                                   ]
+                                                               }
+							   },
+							   {
+                                                               "type": {
+                                                                   "$id": "#/properties/detail/properties/remediations/items/anyOf/0/properties/type",
+                                                                   "type": "string",
+                                                                   "title": "The type schema",
+                                                                   "description": "Type of remediation.",
+                                                                   "default": "",
+							           "enum": ["commands"],
+                                                                   "examples": [
+                                                                       "commands"
+                                                                   ]
+                                                               },
+                                                               "context": {
+                                                                   "$id": "#/properties/detail/properties/remediations/items/anyOf/0/properties/context",
+                                                                   "type": "array",
+                                                                   "title": "The context schema",
+                                                                   "description": "List of remediation commands.",
+                                                                   "default": [],
+                                                                   "examples": [
+								       [
+								           "rm -rf /tmp/42"
+								       ]
+                                                                   ],
+                                                                   "additionalItems": true,
+                                                                   "items": {
+                                                                       "$id": "#/properties/entries/items/anyOf/0/properties/flags/items",
+                                                                       "anyOf": [
+                                                                           {
+                                                                               "$id": "#/properties/entries/items/anyOf/0/properties/flags/items/anyOf/0",
+                                                                               "type": "string",
+                                                                               "title": "The remediation command schema",
+                                                                               "description": "The remediation in form of a command.",
+                                                                               "default": "",
+                                                                               "examples": [
+                                                                                   "rm -rf /tmp/42"
+                                                                               ]
+                                                                           }
+                                                                       ]
+                                                                   }
+                                                               }
+							   }
+						       ]
+                                                    },
+                                                    "additionalProperties": true
+                                                }
+					    ]
+                                        },
+                                        "additionalProperties": true
                                     }
-                                },
-                                "additionalProperties": true
-                            },
+		                }
+			    },
                             "actor": {
                                 "$id": "#/properties/entries/items/anyOf/0/properties/actor",
                                 "type": "string",
-                                "title": "The actor schema",
+                                "title": "The actor name schema",
                                 "description": "Name of the actor that reported a problem.",
                                 "default": "",
                                 "examples": [
@@ -405,7 +582,7 @@
                                 "type": "string",
 			        "format": "uuid",
                                 "title": "The id schema",
-                                "description": "Unique id for the report entry.",
+                                "description": "Unique id for the report entry. Not stable.",
                                 "default": "",
                                 "examples": [
                                     "88e518df66f34e0097ef7b4a4121f50eb5bcf9e8b2c017d1d07dca5e22db65e5"
